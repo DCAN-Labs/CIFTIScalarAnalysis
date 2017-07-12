@@ -1,6 +1,24 @@
 function [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile,varargin)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%ReadCiftisIntoMATLAB will read a list of scalar CIFTIs into matlab via a conc file
+%%%%%%%% INPUTS %%%%%%
+% concfile -- a conc file listing N nifti inputs where N is the number of
+% cases
+% *filename* -- an optional input, when specified, include a string
+% containing the full path to the output file. Scalar data will be stored
+% as a MATLAB .mat file
+% *wb_command* -- an optional input used to specify the path and name of
+% the wb_command. Use if it differs from "wb_command".
+%%%%%%%% OUTPUTS %%%%%
+% scalar_data -- a N by M scalar matrix where N is the number of cases and
+% M is the number of greyordinates. This program makes no assumptions about
+% the number of greyordinates save that they are identical between all
+% cases.
+% filenames -- a N by 1 cell matrix contaiing the full paths to each conc
+% file in the same order as the scalar_data. Useful for double checking
+% that the order is correct.
+%%%%%%%% USAGE %%%%%%%
+% [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile='/path/to/file.conc','wb_command',wb_command='/path/to/wb_command','filename',filename='/path/to/output.mat')
+
 %%set if on beast, comment out if on other systems
 addpath(genpath('/group_shares/PSYCH/code/external/utilities/Matlab_CIFTI'));
 addpath(genpath('/group_shares/PSYCH/code/development/utilities/HCP_Matlab/CIFTIS'));
