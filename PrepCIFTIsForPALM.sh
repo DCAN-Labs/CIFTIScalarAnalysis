@@ -2,19 +2,19 @@
 source $1
 mkdir ${output_directory}
 mkdir ${output_directory}/merged_data
-wb_shortcuts -cifti-concatenate ${output_directory}/merged_data/all_data.dscalar.nii -from-file ${concfile}
+wb_shortcuts -cifti-concatenate ${output_directory}/merged_data/all_data.dscalar.nii -from-file ${concscalarfile}
 wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii -volume-all ${output_directory}/merged_data/all_data_sub.nii -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
 wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_L.func.gii ${output_directory}/merged_data/data_L.func.gii
 wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_R.func.gii ${output_directory}/merged_data/data_R.func.gii
 for subj in `cat ${concfile}` ; do
-    wb_command -surface-vertex-areas ${subj}/L_midthick_surf.gii ${subj}/L_midthick_va.shape.gii
-    wb_command -surface-vertex-areas ${subj}/R_midthick_surf.gii ${subj}/R_midthick_va.shape.gii
+    wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii
+    wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii
 done
 L_MERGELIST=""
 R_MERGELIST=""
 for subj in `cat ${concfile}` ; do
-    L_MERGELIST="${L_MERGELIST} -metric ${subj}/L_midthick_va.shape.gii"
-    R_MERGELIST="${R_MERGELIST} -metric ${subj}/R_midthick_va.shape.gii"
+    L_MERGELIST="${L_MERGELIST} -metric ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii"
+    R_MERGELIST="${R_MERGELIST} -metric ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii"
 done
 wb_command -metric_merge ${output_directory}/merged_data/L_midthick_va.func.gii ${L_MERGELIST}
 wb_command -metric_merge ${output_directory}/merged_data/R_midthick_va.func.gii ${R_MERGELIST}
@@ -86,3 +86,4 @@ pushd ${output_directory}/PALManalysis
 palm L_func.cfg
 palm R_func.cfg
 palm VOL_func.cfg
+popd

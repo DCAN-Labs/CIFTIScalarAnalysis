@@ -106,7 +106,7 @@ switch(analysis_type)
         dlmwrite(strcat(output_directory,'/design.mat'),design_mat,'delimiter','\t');
         dlmwrite(strcat(output_directory,'/design.con'),contrast_mat,'delimiter','\t');
     case('two_sample_test')
-        design_mat = [ones(ncases,1)*groups 1-ones(ncases,1)*groups];
+        design_mat = [ones(ncases,1).*groupfactors 1-ones(ncases,1).*groupfactors];
         contrast_mat = [1 -1; -1 1];      
     case('anova')
         evcount = 0;
