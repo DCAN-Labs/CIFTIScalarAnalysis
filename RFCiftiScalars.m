@@ -15,6 +15,7 @@ function RFCiftiScalars(concfile,outcome,output_directory,datasplit,nrepsCI,ntre
 %the Analysis package for more details.
 %%%%%USAGE%%%%%%
 % RFCiftiScalars(concfile='/path/to/file.conc',outcome=[1 0 1 0...],output_directory='/path/to/output/files',datasplit=0.6,nrepsCI=1000,ntrees=200,nrepsPM=1,proximity_sub_limit=500,'wb_command',wb_command='wb_command','LowDensity',0.05,'StepDensity',0.01,'HighDensity',0.1,'EDA',0.5,'PCA',1000,'MatchGroups','TreeBagsOff');
+
 %%set if on beast, comment out if on other systems
 addpath(genpath('/group_shares/PSYCH/code/release/analysis/RFAnalysis'));
 %%set if on rushmore, comment out if on other systems

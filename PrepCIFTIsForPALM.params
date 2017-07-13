@@ -1,0 +1,12 @@
+concfile=/group_shares/FAIR_LAB2/Projects/FAIR_users/Feczko/projects/CIFTIScalarAnalysis/ciftiscalars.conc
+output_directory=/group_shares/FAIR_LAB2/Projects/FAIR_users/Feczko/projects/PALMAnalysisOutput/
+design_file_paths=/group_shares/FAIR_LAB2/Projects/FAIR_users/Feczko/projects/CIFTIScalarAnalysis/PALMdesign/
+TFCE_enabled=true #if set to true, will enable TFCE
+    cluster_TFCE_height=2 #height parameter for TFCE
+    cluster_TFCE_extent=1 #extent parameter for TFCE
+    cluster_TFCE_clustersize=26 #cluster parameter for TFCE
+cluster_inference=true #if set to true, will enable cluster inferences via -C
+    cluster_threshold_Z=2.36 #threshold for 'C' option for cluster inference
+fdr_correction=true #if set to true, will correct p-values via FDR
+twotail=true #if set to true, will compute two-tailed contrasts
+correction_contrast=true #if set to true will apply FWER to contrasts
