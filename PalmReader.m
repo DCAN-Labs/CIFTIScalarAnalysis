@@ -386,13 +386,13 @@ switch(analysis_type)
         end
 end
 if save_output
-    dlmwrite(strcat(output_directory,'/design.mat'),design_mat,'delimiter','\t');
-    dlmwrite(strcat(output_directory,'/design.con'),contrast_mat,'delimiter','\t');  
+    dlmwrite(strcat(output_directory,'/design_matrix.txt'),design_mat,'delimiter','\t');
+    dlmwrite(strcat(output_directory,'/contrast_matrix.txt'),contrast_mat,'delimiter','\t');  
     if exist('ftest_mat','var')
-        dlmwrite(strcat(output_directory,'/design.fts'),ftest_mat,'delimiter','\t'); 
+        dlmwrite(strcat(output_directory,'/ftest_matrix.txt'),ftest_mat,'delimiter','\t'); 
     end
     if exist('sub_mat','var')
-        dlmwrite(strcat(output_directory,'/design.grp'),sub_mat,'delimiter','\t'); 
+        dlmwrite(strcat(output_directory,'/rm_matrix.txt'),sub_mat,'delimiter','\t'); 
     end
 end
 end
