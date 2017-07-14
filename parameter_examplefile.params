@@ -1,0 +1,15 @@
+#!/bin/bash
+concfile=/mnt/max/shared/projects/FAIR_users/Feczko/projects/cifticlusterpoweranalysis/one_sample_and_ttest_concfile_rushmore.conc
+concscalarfile=/mnt/max/shared/projects/FAIR_users/Feczko/projects/cifticlusterpoweranalysis/one_sample_and_ttest_scalarfile_rushmore.conc
+output_directory=/mnt/max/shared/projects/FAIR_users/Feczko/projects/cifticlusterpoweranalysis/PALMAnalysisOutput/
+design_file_paths=/mnt/max/shared/projects/FAIR_users/Feczko/projects/cifticlusterpoweranalysis/
+TFCE_enabled=true #if set to true, will enable TFCE
+    cluster_TFCE_height=2 #height parameter for TFCE
+    cluster_TFCE_extent=1 #extent parameter for TFCE
+    cluster_TFCE_clustersize=26 #cluster parameter for TFCE
+cluster_inference=true #if set to true, will enable cluster inferences via -C
+    cluster_threshold_Z=2.36 #threshold for 'C' option for cluster inference
+fdr_correction=true #if set to true, will correct p-values via FDR
+twotail=true #if set to true, will compute two-tailed contrasts
+correction_contrast=true #if set to true will apply FWER to contrasts
+npermutations=10000
