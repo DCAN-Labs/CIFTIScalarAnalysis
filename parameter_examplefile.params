@@ -13,3 +13,4 @@ fdr_correction=true #if set to true, will correct p-values via FDR
 twotail=true #if set to true, will compute two-tailed contrasts
 correction_contrast=true #if set to true will apply FWER to contrasts
 npermutations=10000
+clean_up_data=true #if set to true, will remove the merged_data folder, which comprises 90% of the space required for PrepCIFTIsForPALM, PALM, and CreatePALMCIFTIMaps
