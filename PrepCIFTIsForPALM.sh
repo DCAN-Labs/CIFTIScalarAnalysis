@@ -141,8 +141,11 @@ echo " 2) palm L_func.cfg" >> ${output_directory}/palm_instructions.txt
 echo " 3) palm R_func.cfg" >> ${output_directory}/palm_instructions.txt
 echo " 4) palm VOL_func.cfg" >> ${output_directory}/palm_instructions.txt
 echo "For efficiency, it is recommended to run palm for the three cfg files (L,R,VOL) in separate processes." >> ${output_directory}/palm_instructions.txt
-#pushd ${output_directory}/PALManalysis
-#palm L_func.cfg
-#palm R_func.cfg
-#palm VOL_func.cfg
-#popd
+if ${run_palm}; then
+	pushd ${output_directory}/PALManalysis
+	palm L_func.cfg
+	palm R_func.cfg
+	palm VOL_func.cfg
+	CreatePALMCIFTIMaps.sh $1
+	popd
+fi

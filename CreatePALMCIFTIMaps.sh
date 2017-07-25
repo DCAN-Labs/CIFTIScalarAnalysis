@@ -19,4 +19,4 @@ for image in `ls VOLUME_*.nii`; do
 		wb_command -cifti-create-dense-from-template ../merged_data/all_data.dscalar.nii ../CIFTI_outputs/results_${statfile}.dscalar.nii -volume-all VOLUME_${statfile}.nii -metric CORTEX_LEFT LEFT_CORTEX_${statfile}.gii -metric CORTEX_RIGHT RIGHT_CORTEX_${statfile}.gii 
 	fi
 done
-if $clean_up_data; then mv ${output_directory}/merged_data/all_data.dscalar.nii ${output_directory}/ ; rm -rf ${output_directory}/merged_data; fi
+if $clean_up_data; then rm -rf ${output_directory}/merged_data; rm -rf ${output_directory}/PALManalysis; fi
