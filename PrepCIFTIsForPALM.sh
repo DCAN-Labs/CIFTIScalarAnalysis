@@ -19,10 +19,34 @@
 #Usage: PrepCIFTIsForPALM.sh parameter_file.params
 source $1
 export PATH=$PATH:/usr/share/fsl/5.0/bin/ #sets the path to use Text2Vest change or comment out depending on the version
-if [ -f design_matrix.txt ]; then Text2Vest design_matrix.txt design.mat; fi
-if [ -f contrast_matrix.txt ]; then Text2Vest contrast_matrix.txt design.con; fi
-if [ -f ftest_matrix.txt ]; then Text2Vest ftest_matrix.txt design.fts; fi
-if [ -f rm_matrix.txt ]; then Text2Vest rm_matrix.txt design.grp; fi
+if [ -f ${design_file_paths}/design_matrix.txt ]; then
+	if [ -f ${design_file_paths}/design.mat ]; then
+		echo 'design matrix found'
+	else
+		Text2Vest ${design_file_paths}/design_matrix.txt ${design_file_paths}/design.mat
+	fi
+fi
+if [ -f ${design_file_paths}/contrast_matrix.txt ]; then 
+	if [ -f ${design_file_paths}/contrast_matrix.txt ]; then
+		echo 'contrast matrix found'
+	else
+		Text2Vest ${design_file_paths}/contrast_matrix.txt ${design_file_paths}/design.con
+	fi
+fi
+if [ -f ${design_file_paths}/ftest_matrix.txt ]; then 
+	if [ -f ${design_file_paths}/design.fts ]; then
+		echo 'ftest matrix found'
+	else
+		Text2Vest ${design_file_paths}/ftest_matrix.txt ${design_file_paths}/design.fts
+	fi
+fi
+if [ -f ${design_file_paths}/rm_matrix.txt ]; then 
+	if [ -f ${design_file_paths}/design.grp ]; then
+		echo 'group matrix found'
+	else
+		Text2Vest ${design_file_paths}/rm_matrix.txt ${design_file_paths}/design.grp
+	fi
+fi
 mkdir ${output_directory}
 mkdir ${output_directory}/merged_data
 wb_shortcuts -cifti-concatenate ${output_directory}/merged_data/all_data.dscalar.nii -from-file ${concscalarfile}
@@ -31,10 +55,18 @@ cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii
 cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
 for subj in `cat ${concfile}` ; do
     if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ]; then
-    	wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii
+	if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii ]; then
+		echo ${subj} LH shape file exists and will not be generated here
+	else
+    		wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii
+	fi
     fi
     if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ]; then
-    	wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii
+	if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii ]; then
+		echo ${subj} RH shape file exists and will not be generated here
+	else
+	    	wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii
+	fi
     fi
 done
 L_MERGELIST=""
@@ -91,8 +123,8 @@ if ${TFCE_enabled}; then
     echo "-T" >> ${output_directory}/PALManalysis/L_func.cfg
     echo "-T" >> ${output_directory}/PALManalysis/R_func.cfg
     echo "-T" >> ${output_directory}/PALManalysis/VOL_func.cfg
-    echo "-tfce2d" >> ${output_directory}/PALManalysis/L_func.cfg
-    echo "-tfce2d" >> ${output_directory}/PALManalysis/R_func.cfg
+    echo "-tfce2D" >> ${output_directory}/PALManalysis/L_func.cfg
+    echo "-tfce2D" >> ${output_directory}/PALManalysis/R_func.cfg
 fi
 if ${cluster_inference}; then
     echo "-C ${cluster_threshold_Z}" >> ${output_directory}/PALManalysis/L_func.cfg
