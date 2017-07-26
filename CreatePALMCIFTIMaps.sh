@@ -20,3 +20,4 @@ for image in `ls VOLUME_*.nii`; do
 	fi
 done
 if $clean_up_data; then rm -rf ${output_directory}/merged_data; rm -rf ${output_directory}/PALManalysis; fi
+popd
