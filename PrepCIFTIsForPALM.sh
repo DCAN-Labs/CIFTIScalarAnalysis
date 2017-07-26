@@ -91,15 +91,8 @@ if ${TFCE_enabled}; then
     echo "-T" >> ${output_directory}/PALManalysis/L_func.cfg
     echo "-T" >> ${output_directory}/PALManalysis/R_func.cfg
     echo "-T" >> ${output_directory}/PALManalysis/VOL_func.cfg
-    echo "-tfce_H ${cluster_TFCE_height}" >> ${output_directory}/PALManalysis/L_func.cfg
-    echo "-tfce_E ${cluster_TFCE_extent}" >> ${output_directory}/PALManalysis/L_func.cfg
-    echo "-tfce_C ${cluster_TFCE_clustersize}" >> ${output_directory}/PALManalysis/L_func.cfg
-    echo "-tfce_H ${cluster_TFCE_height}" >> ${output_directory}/PALManalysis/R_func.cfg
-    echo "-tfce_E ${cluster_TFCE_extent}" >> ${output_directory}/PALManalysis/R_func.cfg
-    echo "-tfce_C ${cluster_TFCE_clustersize}" >> ${output_directory}/PALManalysis/R_func.cfg
-    echo "-tfce_H ${cluster_TFCE_height}" >> ${output_directory}/PALManalysis/VOL_func.cfg
-    echo "-tfce_E ${cluster_TFCE_extent}" >> ${output_directory}/PALManalysis/VOL_func.cfg
-    echo "-tfce_C ${cluster_TFCE_clustersize}" >> ${output_directory}/PALManalysis/VOL_func.cfg
+    echo "-tfce2d" >> ${output_directory}/PALManalysis/L_func.cfg
+    echo "-tfce2d" >> ${output_directory}/PALManalysis/R_func.cfg
 fi
 if ${cluster_inference}; then
     echo "-C ${cluster_threshold_Z}" >> ${output_directory}/PALManalysis/L_func.cfg
