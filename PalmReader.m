@@ -49,6 +49,11 @@ function [design_mat,contrast_mat,ftest_mat,sub_mat] = PalmReader(ncases,varargi
 %  error will occur.
 % *'SaveOutput'* -- a string that represents the full path to the output
 % directory. The program will save the design files in that directory.
+% *'RegressorVector'* -- a vector denoting which columns in Groups are
+% actually continuous variables. Only used if "regression" is selected. If
+% left unspecified, all columns in groups are assumed to be regressors.
+% Regressors will be automatically mean-centered, in case one forgot to do
+% so.
 %%%%%%%% OUTPUTS %%%%%
 % design_mat -- a N*RM by EV  matrix where N is the number of cases, RM is 
 %  the number of repeated measures and EV is the number of parameter 
@@ -88,6 +93,8 @@ if isempty(varargin) == 0
                         output_directory = varargin{i+1};
                     case('Groups')
                         groupfactors = varargin{i+1};
+                    case('RegressorVector')
+                        regressors = varargin{i+1};
                 end
             end
         end
@@ -103,11 +110,21 @@ switch(analysis_type)
     case('one_sample_test')
         design_mat = [ones(ncases,1) ones(ncases,1)*-1];
         contrast_mat = [1 0; 0 1];
-        dlmwrite(strcat(output_directory,'/design.mat'),design_mat,'delimiter','\t');
-        dlmwrite(strcat(output_directory,'/design.con'),contrast_mat,'delimiter','\t');
     case('two_sample_test')
         design_mat = [ones(ncases,1).*groupfactors 1-ones(ncases,1).*groupfactors];
-        contrast_mat = [1 -1; -1 1];      
+        contrast_mat = [1 -1; -1 1];
+    case('regression')
+        if exist('regressors','var')
+        else
+            regressors = ones(size(groupfactors,2),1);
+        end
+        for curr_groupfactor = 1:size(groupfactors,2)
+            if regressors(curr_group_factor) > 0
+                groupfactors(:,curr_groupfactor) = groupfactors(:,curr_groupfactor) - mean(groupfactors(:,curr_groupfactor));
+            end
+        end
+        design_mat = groupfactors(:,regressors > 0);
+        contrast_mat = eye(size(design_mat,2));
     case('anova')
         evcount = 0;
         evcountthresh = [ 0 cumsum(factor_levels -1)];
