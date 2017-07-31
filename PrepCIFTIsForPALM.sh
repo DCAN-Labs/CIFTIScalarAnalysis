@@ -155,12 +155,14 @@ echo "-o VOLUME" >> ${output_directory}/PALManalysis/VOL_func.cfg
 #the instructions below will run PALM on each of the three datasets
 touch ${output_directory}/palm_instructions.txt
 echo "PALM files are prepared. To run palm follow these steps:"
+echo " 0) ensure that PALM is in your PATH variable (e.g. export PATH=/mnt/max/shared/code/external/analyses/PALM/:$PATH) "
 echo " 1) cd ${output_directory}/PALManalysis"
 echo " 2) palm L_func.cfg"
 echo " 3) palm R_func.cfg"
 echo " 4) palm VOL_func.cfg"
 echo "For efficiency, it is recommended to run palm for the three cfg files (L,R,VOL) in separate processes."
 echo "PALM files are prepared. To run palm follow these steps:" >> ${output_directory}/palm_instructions.txt
+echo " 0) ensure that PALM is in your PATH variable (e.g. export PATH=/mnt/max/shared/code/external/analyses/PALM/:$PATH) " >> ${output_directory}/palm_instructions.txt
 echo " 1) cd ${output_directory}/PALManalysis" >> ${output_directory}/palm_instructions.txt
 echo " 2) palm L_func.cfg" >> ${output_directory}/palm_instructions.txt
 echo " 3) palm R_func.cfg" >> ${output_directory}/palm_instructions.txt
