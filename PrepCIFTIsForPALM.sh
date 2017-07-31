@@ -27,7 +27,7 @@ if [ -f ${design_file_paths}/design_matrix.txt ]; then
 	fi
 fi
 if [ -f ${design_file_paths}/contrast_matrix.txt ]; then 
-	if [ -f ${design_file_paths}/contrast_matrix.txt ]; then
+	if [ -f ${design_file_paths}/design.con ]; then
 		echo 'contrast matrix found'
 	else
 		Text2Vest ${design_file_paths}/contrast_matrix.txt ${design_file_paths}/design.con
