@@ -17,6 +17,9 @@ for image in `ls VOLUME_*.nii`; do
  	if [ `expr "$statfile" : \vox` == 0 ]; then
 #edit the prefixes (or rename the files) in the command below for VOLUME,LEFT_CORTEX,and RIGHT_CORTEX, if generated differently. Or just rename your outputs :)
 		wb_command -cifti-create-dense-from-template ../merged_data/all_data.dscalar.nii ../CIFTI_outputs/results_${statfile}.dscalar.nii -volume-all VOLUME_${statfile}.nii -metric CORTEX_LEFT LEFT_CORTEX_${statfile}.gii -metric CORTEX_RIGHT RIGHT_CORTEX_${statfile}.gii 
+	else
+		statfile_cortex=`echo $statfile | sed s:vox:dpv:`
+		wb_command -cifti-create-dense-from-template ../merged_data/all_data.dscalar.nii ../CIFTI_outputs/results_${statfile}.dscalar.nii -volume-all VOLUME_${statfile}.nii -metric CORTEX_LEFT LEFT_CORTEX_${statfile_cortex}.gii -metric CORTEX_RIGHT RIGHT_CORTEX_${statfile_cortex}.gii 
 	fi
 done
 if $clean_up_data; then rm -rf ${output_directory}/merged_data; rm -rf ${output_directory}/PALManalysis; fi
