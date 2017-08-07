@@ -119,7 +119,7 @@ switch(analysis_type)
             regressors = ones(size(groupfactors,2),1);
         end
         for curr_groupfactor = 1:size(groupfactors,2)
-            if regressors(curr_group_factor) > 0
+            if regressors(curr_groupfactor) > 0
                 groupfactors(:,curr_groupfactor) = groupfactors(:,curr_groupfactor) - mean(groupfactors(:,curr_groupfactor));
             end
         end
@@ -403,6 +403,7 @@ switch(analysis_type)
         end
 end
 if save_output
+    mkdir(output_directory);
     dlmwrite(strcat(output_directory,'/design_matrix.txt'),design_mat,'delimiter','\t');
     dlmwrite(strcat(output_directory,'/contrast_matrix.txt'),contrast_mat,'delimiter','\t');  
     if exist('ftest_mat','var')
