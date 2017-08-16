@@ -18,6 +18,20 @@
 #
 #Usage: PrepCIFTIsForPALM.sh parameter_file.params
 source $1
+#if parameters are unspecified set defaults
+cortex=${cortex:-'false'} #automatically default to running volumes+cortex
+zstat=${zstat:-'true'} #automatically turn on z-stats, assuming group comparisons
+logp=${logp:-'true'} #automatically turn on log transformed p values
+pearson=${pearson:-'false'} #automatically turn off pearson values, assuming group comparisons
+run_palm=${run_palm:-'false'} #do not run palm automatically
+npermutations=${npermutations:-10000} #set permutations to default 10,000
+correction_contrast=${correction_contrast:-'true'} #correct for multiple contrasts by default
+twotail=${twotail:-'false'} #set two-tail correction to false -- contrasts are run both ways anyways
+fdr_correction=${fdr_correction:-'true'} #set fdr correction to true
+cluster_inference=${cluster_inference:-'true'} #perform basic cluster inference
+TFCE_enabled=${TFCE_enabled:-'true'} #enable TFCE
+cluster_threshold=${cluster_threshold:-2.36} #set cluster mass to 2.36
+
 export PATH=$PATH:/usr/share/fsl/5.0/bin/ #sets the path to use Text2Vest change or comment out depending on the version
 if [ -f ${design_file_paths}/design_matrix.txt ]; then
 	if [ -f ${design_file_paths}/design.mat ]; then
@@ -50,7 +64,11 @@ fi
 mkdir ${output_directory}
 mkdir ${output_directory}/merged_data
 wb_shortcuts -cifti-concatenate ${output_directory}/merged_data/all_data.dscalar.nii -from-file ${concscalarfile}
-wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -volume-all ${output_directory}/merged_data/all_data_sub.nii -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+if ${cortex}; then
+	wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+else
+	wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -volume-all ${output_directory}/merged_data/all_data_sub.nii -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+fi
 cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${output_directory}/merged_data/L.midthickness.surf.gii
 cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
 for subj in `cat ${concfile}` ; do
@@ -148,6 +166,21 @@ if ${fdr_correction}; then
     echo "-fdr" >> ${output_directory}/PALManalysis/L_func.cfg
     echo "-fdr" >> ${output_directory}/PALManalysis/R_func.cfg
     echo "-fdr" >> ${output_directory}/PALManalysis/VOL_func.cfg
+fi
+if ${pearson}; then
+    echo "-pearson" >> ${output_directory}/PALManalysis/L_func.cfg
+    echo "-pearson" >> ${output_directory}/PALManalysis/R_func.cfg
+    echo "-pearson" >> ${output_directory}/PALManalysis/VOL_func.cfg
+fi
+if ${zstat}; then
+    echo "-zstat" >> ${output_directory}/PALManalysis/L_func.cfg
+    echo "-zstat" >> ${output_directory}/PALManalysis/R_func.cfg
+    echo "-zstat" >> ${output_directory}/PALManalysis/VOL_func.cfg
+fi
+if ${logp}; then
+    echo "-logp" >> ${output_directory}/PALManalysis/L_func.cfg
+    echo "-logp" >> ${output_directory}/PALManalysis/R_func.cfg
+    echo "-logp" >> ${output_directory}/PALManalysis/VOL_func.cfg
 fi
 echo "-o LEFT_CORTEX" >> ${output_directory}/PALManalysis/L_func.cfg
 echo "-o RIGHT_CORTEX" >> ${output_directory}/PALManalysis/R_func.cfg
