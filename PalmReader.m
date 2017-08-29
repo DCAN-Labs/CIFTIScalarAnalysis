@@ -125,7 +125,7 @@ switch(analysis_type)
         end
 	if size(groupfactors,2) == 1
 	    groupfactors(:,2) = groupfactors(:,1) * -1;
-	    regressors = ones(size(groupfactors,2),1)
+	    regressors = ones(size(groupfactors,2),1);
 	end
         design_mat = groupfactors(:,regressors > 0);
         contrast_mat = [1 0;0 1];

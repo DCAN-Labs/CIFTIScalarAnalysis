@@ -78,6 +78,7 @@ for current_rep = 1:nreps
         fprintf(fidb,'%s\n',filenames_scalar{filename_orders(currfile,current_rep)});
     end
     fclose(fid);
+    fclose(fidb);
 end
 end
 

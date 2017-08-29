@@ -63,14 +63,30 @@ if [ -f ${design_file_paths}/rm_matrix.txt ]; then
 fi
 mkdir ${output_directory}
 mkdir ${output_directory}/merged_data
-wb_shortcuts -cifti-concatenate ${output_directory}/merged_data/all_data.dscalar.nii -from-file ${concscalarfile}
-if ${cortex}; then
-	wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+if [ -f ${output_directory}/merged_data/all_data.dscalar.nii ]; then
+    echo "all_data scalar found"
 else
-	wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -volume-all ${output_directory}/merged_data/all_data_sub.nii -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+    wb_shortcuts -cifti-concatenate ${output_directory}/merged_data/all_data.dscalar.nii -from-file ${concscalarfile}
 fi
-cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${output_directory}/merged_data/L.midthickness.surf.gii
-cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
+if ${cortex}; then
+    if [ -f ${output_directory}/merged_data/data_L.func.gii ] && [ -f ${output_directory}/merged_data/data_R.func.gii ]; then
+        echo "dscalar gifti files generated"
+    else
+	    wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+    fi
+else
+    if [ -f ${output_directory}/merged_data/data_L.func.gii ] && [ -f ${output_directory}/merged_data/data_R.func.gii ] && [ -f {output_directory}/merged_data/all_data_sub.nii ]; then
+        echo "dscalar gifti and nifti files generated"
+    else
+	    wb_command -cifti-separate ${output_directory}/merged_data/all_data.dscalar.nii COLUMN -volume-all ${output_directory}/merged_data/all_data_sub.nii -metric CORTEX_LEFT ${output_directory}/merged_data/data_L.func.gii -metric CORTEX_RIGHT ${output_directory}/merged_data/data_R.func.gii
+    fi
+fi
+if [ -f ${output_directory}/merged_data/L.midthickness.surf.gii ] && [ -f ${output_directory}/merged_data/R.midthickness.surf.gii ]; then
+    echo "surface files generated"
+else
+    cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${output_directory}/merged_data/L.midthickness.surf.gii
+    cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
+fi
 for subj in `cat ${concfile}` ; do
     if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ]; then
 	if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii ]; then
@@ -87,16 +103,20 @@ for subj in `cat ${concfile}` ; do
 	fi
     fi
 done
-L_MERGELIST=""
-R_MERGELIST=""
-for subj in `cat ${concfile}` ; do
-    L_MERGELIST="${L_MERGELIST} -metric ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii"
-    R_MERGELIST="${R_MERGELIST} -metric ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii"
-done
-wb_command -metric-merge ${output_directory}/merged_data/L_midthick_va.func.gii ${L_MERGELIST}
-wb_command -metric-merge ${output_directory}/merged_data/R_midthick_va.func.gii ${R_MERGELIST}
-wb_command -metric-reduce ${output_directory}/merged_data/L_midthick_va.func.gii MEAN ${output_directory}/merged_data/L_area.func.gii
-wb_command -metric-reduce ${output_directory}/merged_data/R_midthick_va.func.gii MEAN ${output_directory}/merged_data/R_area.func.gii
+if [ -f ${output_directory}/merged_data/L_area.func.gii ] && [ -f ${output_directory}/merged_data/R_area.func.gii ]; then
+    echo "surface area files generated"
+else
+    L_MERGELIST=""
+    R_MERGELIST=""
+    for subj in `cat ${concfile}` ; do
+        L_MERGELIST="${L_MERGELIST} -metric ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii"
+        R_MERGELIST="${R_MERGELIST} -metric ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii"
+    done
+    wb_command -metric-merge ${output_directory}/merged_data/L_midthick_va.func.gii ${L_MERGELIST}
+    wb_command -metric-merge ${output_directory}/merged_data/R_midthick_va.func.gii ${R_MERGELIST}
+    wb_command -metric-reduce ${output_directory}/merged_data/L_midthick_va.func.gii MEAN ${output_directory}/merged_data/L_area.func.gii
+    wb_command -metric-reduce ${output_directory}/merged_data/R_midthick_va.func.gii MEAN ${output_directory}/merged_data/R_area.func.gii
+fi
 #the conversions below are only needed for octave -- MATLAB can handle compression internally
 wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_L.func.gii ${output_directory}/merged_data/data_L.func.gii
 wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_R.func.gii ${output_directory}/merged_data/data_R.func.gii
@@ -205,7 +225,11 @@ if ${run_palm}; then
 	pushd ${output_directory}/PALManalysis
 	palm L_func.cfg
 	palm R_func.cfg
-	palm VOL_func.cfg
+    if ${cortex}; then
+        echo "cortex selected, not running_volume"
+    else
+	    palm VOL_func.cfg
+    fi
 	CreatePALMCIFTIMaps.sh $1
 	popd
 fi
