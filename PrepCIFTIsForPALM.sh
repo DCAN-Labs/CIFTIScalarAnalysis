@@ -87,25 +87,25 @@ else
     cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${output_directory}/merged_data/L.midthickness.surf.gii
     cp `head -n 1 ${concfile}`/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
 fi
-for subj in `cat ${concfile}` ; do
-    if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ]; then
-	if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii ]; then
-		echo ${subj} LH shape file exists and will not be generated here
-	else
-    		wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii
-	fi
-    fi
-    if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ]; then
-	if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii ]; then
-		echo ${subj} RH shape file exists and will not be generated here
-	else
-	    	wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii
-	fi
-    fi
-done
 if [ -f ${output_directory}/merged_data/L_area.func.gii ] && [ -f ${output_directory}/merged_data/R_area.func.gii ]; then
     echo "surface area files generated"
 else
+    for subj in `cat ${concfile}` ; do
+        if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ]; then
+	    if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii ]; then
+		    echo ${subj} LH shape file exists and will not be generated here
+	    else
+    	    	wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*L.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/L_midthick_va.shape.gii
+	    fi
+        fi
+        if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ]; then
+	    if [ -f ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii ]; then
+		    echo ${subj} RH shape file exists and will not be generated here
+	    else
+	        	wb_command -surface-vertex-areas ${subj}/MNINonLinear/fsaverage_LR32k/*R.midthickness*surf.gii ${subj}/MNINonLinear/fsaverage_LR32k/R_midthick_va.shape.gii
+	    fi
+        fi
+    done
     L_MERGELIST=""
     R_MERGELIST=""
     for subj in `cat ${concfile}` ; do
