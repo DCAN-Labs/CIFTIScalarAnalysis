@@ -123,8 +123,12 @@ switch(analysis_type)
                 groupfactors(:,curr_groupfactor) = groupfactors(:,curr_groupfactor) - mean(groupfactors(:,curr_groupfactor));
             end
         end
+	if size(groupfactors,2) == 1
+	    groupfactors(:,2) = groupfactors(:,1) * -1;
+	    regressors = ones(size(groupfactors,2),1)
+	end
         design_mat = groupfactors(:,regressors > 0);
-        contrast_mat = eye(size(design_mat,2));
+        contrast_mat = [1 0;0 1];
     case('anova')
         evcount = 0;
         evcountthresh = [ 0 cumsum(factor_levels -1)];
