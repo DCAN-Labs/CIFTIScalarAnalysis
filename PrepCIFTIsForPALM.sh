@@ -118,12 +118,14 @@ else
     wb_command -metric-reduce ${output_directory}/merged_data/R_midthick_va.func.gii MEAN ${output_directory}/merged_data/R_area.func.gii
 fi
 #the conversions below are only needed for octave -- MATLAB can handle compression internally
-wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_L.func.gii ${output_directory}/merged_data/data_L.func.gii
-wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_R.func.gii ${output_directory}/merged_data/data_R.func.gii
-wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/L_area.func.gii ${output_directory}/merged_data/L_area.func.gii
-wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/R_area.func.gii ${output_directory}/merged_data/R_area.func.gii
-wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/L.midthickness.surf.gii ${output_directory}/merged_data/L.midthickness.surf.gii
-wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/R.midthickness.surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
+if ${convert64}; then
+	wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_L.func.gii ${output_directory}/merged_data/data_L.func.gii
+	wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/data_R.func.gii ${output_directory}/merged_data/data_R.func.gii
+	wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/L_area.func.gii ${output_directory}/merged_data/L_area.func.gii
+	wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/R_area.func.gii ${output_directory}/merged_data/R_area.func.gii
+	wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/L.midthickness.surf.gii ${output_directory}/merged_data/L.midthickness.surf.gii
+	wb_command -gifti-convert BASE64_BINARY ${output_directory}/merged_data/R.midthickness.surf.gii ${output_directory}/merged_data/R.midthickness.surf.gii
+fi
 #data files are prepped, the below prepares PALM configuration files for running palm.
 echo "data is prepared, time to run PALM!"
 mkdir ${output_directory}/PALManalysis

@@ -19,3 +19,4 @@ pearson=false #if set to true, will calculate pearson correlation values, use wh
 logp=true #if set to true, all p values will be log transformed for visualization
 zstat=false #if set to true, all statistics SHOULD be converted to z-scores -- not sure if this is bugged, however.
 cortex=false #if set to true, only cortical data will be used when running PrepCITFTIsforPALM.sh and CreateCIFTIPALMmaps.sh
+convert64=false #if set to true, will convert all merged_data files into 64 bit for processing via Octave
