@@ -75,6 +75,7 @@ function [design_mat,contrast_mat,ftest_mat,sub_mat] = PalmReader(ncases,varargi
 %%%%%%%% USAGE %%%%%%%
 % [design_mat,contrast_mat,ftest_mat,sub_mat] = PalmReader(ncases=20,'AnalysisType',analysis_type='anova','SaveOutput',output_directory='/path/to/output/','Groups',group_factors = [ 1 1 0 0...;0 0 2 1...],'NumFactors',numfactors=2,'LevelsPerFactor',factor_levels = [2 2])
 save_output = 0;
+two_tailed = false;
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if isstruct(varargin{i}) == 0
@@ -108,8 +109,9 @@ catch
 end
 switch(analysis_type)
     case('one_sample_test')
-        design_mat = [ones(ncases,1) ones(ncases,1)*-1];
-        contrast_mat = [1 0; 0 1];
+        design_mat = ones(ncases,1);
+        contrast_mat = 1;
+        two_tailed=true;
     case('two_sample_test')
         design_mat = [ones(ncases,1).*groupfactors 1-ones(ncases,1).*groupfactors];
         contrast_mat = [1 -1; -1 1];
@@ -123,12 +125,9 @@ switch(analysis_type)
                 groupfactors(:,curr_groupfactor) = groupfactors(:,curr_groupfactor) - mean(groupfactors(:,curr_groupfactor));
             end
         end
-	if size(groupfactors,2) == 1
-	    groupfactors(:,2) = groupfactors(:,1) * -1;
-	    regressors = ones(size(groupfactors,2),1);
-	end
         design_mat = groupfactors(:,regressors > 0);
-        contrast_mat = [1 0;0 1];
+        contrast_mat = eye(size(design_mat,2),size(design_mat,2));
+        two_tailed = true;
     case('anova')
         evcount = 0;
         evcountthresh = [ 0 cumsum(factor_levels -1)];
@@ -403,6 +402,7 @@ switch(analysis_type)
                 end
             end
             ftest_mat = eye(ncontrasts);
+            design_mat = ev;
         else
         end
 end
