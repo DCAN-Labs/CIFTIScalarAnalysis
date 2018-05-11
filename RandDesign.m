@@ -4,7 +4,7 @@ function [random_designs] = RandDesign(ncases,nreps,varargin)
 %   RandDesign can be used to aid in simulation studies for regression
 %   problems
 shuffletype='normal'; %default is to select data from a normal distribution
-output_prefix = 'random';
+output_prefix = 'design_matrix';
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if size(varargin{i},1) <= 1
@@ -41,7 +41,7 @@ switch(shuffletype)
             count = count + 1;
             temp_output_directory = strcat(output_directory,'/design_',num2str(count));
             mkdir(temp_output_directory);
-            fid = fopen(strcat(temp_output_directory,'/',output_prefix,'_',num2str(count),'.txt'),'wt');
+            fid = fopen(strcat(temp_output_directory,'/',output_prefix,'.txt'),'wt');
             fprintf(fid,'%f\t%f\n',random_designs(:,count:count+1)');
             fclose(fid);
             contrast_matrix = [1, 0;0, 1];

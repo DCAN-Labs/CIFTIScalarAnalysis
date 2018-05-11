@@ -20,13 +20,13 @@ function [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile,varargin)
 % [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile='/path/to/file.conc','wb_command',wb_command='/path/to/wb_command','filename',filename='/path/to/output.mat')
 
 %%set if on beast, comment out if on other systems
-addpath(genpath('/group_shares/PSYCH/code/external/utilities/Matlab_CIFTI'));
-addpath(genpath('/group_shares/PSYCH/code/development/utilities/HCP_Matlab/CIFTIS'));
-addpath(genpath('/group_shares/PSYCH/code/development/utilities/gifti-1.6'));
+%addpath(genpath('/group_shares/PSYCH/code/external/utilities/Matlab_CIFTI'));
+%addpath(genpath('/group_shares/PSYCH/code/development/utilities/HCP_Matlab/CIFTIS'));
+%addpath(genpath('/group_shares/PSYCH/code/development/utilities/gifti-1.6'));
 %%set if on rushmore, comment out if on other systems
-%addpath(genpath('/mnt/max/shared/code/external/utilities/Matlab_CIFTI'))
-%addpath(genpath('/mnt/max/shared/code/internal/utilities/CIFTI/'))
-%addpath(genpath('/mnt/max/shared/code/external/utilities/gifti-1.6'))
+addpath(genpath('/mnt/max/shared/code/external/utilities/Matlab_CIFTI'))
+addpath(genpath('/mnt/max/shared/code/internal/utilities/CIFTI/'))
+addpath(genpath('/mnt/max/shared/code/external/utilities/gifti-1.6'))
 %%choose your own path! comment out if on beast or rushmore
 %addpath(genpath('/this/Path/is/my/path/'));
 %addpath(genpath('/this/path/is/your/path'));
