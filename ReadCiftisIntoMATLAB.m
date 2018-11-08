@@ -34,6 +34,7 @@ addpath(genpath('/mnt/max/shared/code/external/utilities/gifti-1.6'))
 wb_command='wb_command';
 data_type = 'scalar';
 within_networks = false;
+large_file = false;
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if ischar(varargin{i})
@@ -48,6 +49,8 @@ if isempty(varargin) == 0
                     modules = varargin{i+1};
                 case('WithinNetworks')
                     within_networks = true;
+                case('v73')
+                    large_file = true;
             end
         end
     end
@@ -67,7 +70,11 @@ switch data_type
             scalar_data(current_sub,:) = temp_cifti.cdata;
         end
         if exist('filename','var')
-            save(filename,'scalar_data', 'filenames');
+            if large_file
+                save(filename,'scalar_data', 'filenames','-v7.3');               
+            else
+                save(filename,'scalar_data', 'filenames');
+            end
         end        
     case('connmat')
         for current_sub = 1:nsubs
@@ -78,8 +85,12 @@ switch data_type
             end
             scalar_data(:,:,current_sub) = temp_cifti.cdata;
         end
-        if exist('filename','var')
-            save(filename,'scalar_data', 'filenames');
+        if exist('filename','var')            
+            if large_file
+                save(filename,'scalar_data', 'filenames','-v7.3');               
+            else
+                save(filename,'scalar_data', 'filenames');
+            end
         end        
     case('connmat2scalar')
         if within_networks
@@ -105,7 +116,11 @@ switch data_type
                 end
             end
             if exist('filename','var')
-                save(filename,'scalar_data', 'filenames','new_modules');
+                if large_file
+                    save(filename,'scalar_data', 'filenames','new_modules','-v7.3');
+                else
+                    save(filename,'scalar_data', 'filenames','new_modules');
+                end
             end
         else
             module_ids = unique(modules(:,1));
@@ -129,7 +144,7 @@ switch data_type
                             conns_in_mod(:) = old_conns_in_mod;
                         end
                         scalar_data(current_sub,curr_conn:curr_conn+(length(conns_in_mod)-1)) = conns_in_mod;
-                    	if current_sub == 1
+                        if current_sub == 1
                             new_modules(curr_conn:curr_conn+length(conns_in_mod)-1) = module_count;
                             module_names(curr_conn:curr_conn+length(conns_in_mod)-1) = {[num2str(module_ids(curr_module)) 'to' num2str(module_ids(second_module))]};
                             module_count = module_count + 1;
@@ -139,7 +154,11 @@ switch data_type
                 end
             end 
             if exist('filename','var')
-                save(filename,'scalar_data','module_names','new_modules', 'filenames');
+                if large_file
+                    save(filename,'scalar_data','module_names','new_modules', 'filenames','-v7.3');
+                else
+                    save(filename,'scalar_data','module_names','new_modules', 'filenames');
+                end
             end
         end
 end
