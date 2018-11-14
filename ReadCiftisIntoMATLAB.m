@@ -19,18 +19,9 @@ function [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile,varargin)
 %%%%%%%% USAGE %%%%%%%
 % [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile='/path/to/file.conc','wb_command',wb_command='/path/to/wb_command','filename',filename='/path/to/output.mat')
 
-%%set if on beast, comment out if on other systems
-%addpath(genpath('/group_shares/PSYCH/code/external/utilities/Matlab_CIFTI'));
-%addpath(genpath('/group_shares/PSYCH/code/development/utilities/HCP_Matlab/CIFTIS'));
-%addpath(genpath('/group_shares/PSYCH/code/development/utilities/gifti-1.6'));
-%%set if on rushmore, comment out if on other systems
-addpath(genpath('/mnt/max/shared/code/external/utilities/Matlab_CIFTI'))
-addpath(genpath('/mnt/max/shared/code/internal/utilities/CIFTI/'))
-addpath(genpath('/mnt/max/shared/code/external/utilities/gifti-1.6'))
-%%choose your own path! comment out if on beast or rushmore
-%addpath(genpath('/this/Path/is/my/path/'));
-%addpath(genpath('/this/path/is/your/path'));
-%addpath(genpath('/im/mr/meseeeks/lookatme'));
+matlab_ciftipath = '/mnt/max/shared/code/external/utilities/Matlab_CIFTI';
+ciftipath = '/mnt/max/shared/code/internal/utilities/CIFTI/';
+giftipath = '/mnt/max/shared/code/external/utilities/gifti-1.6';
 wb_command='wb_command';
 data_type = 'scalar';
 within_networks = false;
@@ -39,7 +30,7 @@ if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if ischar(varargin{i})
             switch(varargin{i})
-                case('wb_command')
+                case('WB_command')
                     wb_command = varargin{i+1};
                 case('filename')
                     filename = varargin{i+1};
@@ -51,15 +42,36 @@ if isempty(varargin) == 0
                     within_networks = true;
                 case('v73')
                     large_file = true;
+                case('MatlabCiftiPath')
+                    matlab_ciftipath = varargin{i+1};
+                case('CiftiPath')
+                    ciftipath = varargin{i+1};
+                case('GiftiPath')
+                    giftipath = varargin{i+1};
             end
         end
     end
 end
+addpath(genpath(matlab_ciftipath));
+addpath(genpath(ciftipath));
+addpath(genpath(giftipath));
 fid = fopen(concfile);
 stuff = textscan(fid,'%s');
 filenames = stuff{1};
 nsubs = length(filenames);
 switch data_type
+    case('dtseries')
+        scalar_data = cell(nsubs,1);
+        for current_sub = 1:nsubs
+            scalar_data{current_sub} = ciftiopen(filenames{current_sub},wb_command);
+        end
+        if exist('filename','var')
+            if large_file
+                save(filename,'scalar_data', 'filenames','-v7.3');               
+            else
+                save(filename,'scalar_data', 'filenames');
+            end
+        end     
     case('scalar')
         for current_sub = 1:nsubs
             temp_cifti = ciftiopen(filenames{current_sub},wb_command);
