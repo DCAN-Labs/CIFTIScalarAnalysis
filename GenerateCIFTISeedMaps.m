@@ -33,8 +33,6 @@ if isempty(varargin) == 0
                     dscalar_roifile = varargin{i+1};
                 case('FD')
                     FD = varargin{i+1};
-                case('ExtractionType')
-                    extraction_type = varargin{i+1};
                 case('NumComponents')
                     num_components = varargin{i+1};
             end
@@ -46,8 +44,8 @@ addpath(genpath(ciftipath));
 addpath(genpath(giftipath));
 [dtseries_data,filenames] = ReadCiftisIntoMATLAB(dtseries_concfile,'WB_command',wb_command,'DataType','dtseries');
 motion_data = ReadMotionMatFiles(motion_concfile,'FD',FD);
-ROI_file = ReadCiftisIntoMATLAB(dscalar_roifile,'WB_command',wb_command,'DataType','scalar');
-ROI_file_split = split(ROI_file,'/');
+ROI_file = ciftiopen(dscalar_roifile,wb_command);
+ROI_file_split = split(dscalar_roifile,'/');
 ROI_filename = ROI_file_split(end);
 ROI_data = ROI_file.cdata;
 nsubs = length(dtseries_data);
@@ -60,17 +58,17 @@ for current_sub = 1:nsubs
             [components,~,~,~,varexplained] = pca(dtseries_sub_ROI','NumComponents',num_components);
             pca_dtseries_ROI = dtseries_sub_ROI*0;
             for curr_component = 1:num_components
-                pca_dtseries_ROI = pca_dtseries_ROI + (dtseries_sub_ROI.*components(:,curr_component)).*(varexplained/100);
+                pca_dtseries_ROI = pca_dtseries_ROI + (dtseries_sub_ROI.*components(:,curr_component)).*(varexplained(curr_component)/100);
             end
             new_dtseries_ROI = mean(pca_dtseries_ROI,1);
         case('mean')
-            new_dtseries_ROI = mean(dt_series_sub_ROI,1);
+            new_dtseries_ROI = mean(dtseries_sub_ROI,1);
     end
     sub_scalar_corr = corr(dtseries_sub',new_dtseries_ROI');
-    split(filenames{current_sub},'/')
     file_split = split(filenames{current_sub},'/');
     new_filename = file_split(end);
     ROI_file.cdata = sub_scalar_corr;
-    ciftisave(ROI_file,strcat(output_directory,'/',new_filename,'_corr_via_',ROI_filename,'.dscalar.nii'),wb_command);
+    file_output = char(strcat(output_directory,'/',new_filename,'_corr_via_',ROI_filename,'.dscalar.nii'))
+    ciftisave(ROI_file,file_output,wb_command);
 end
 

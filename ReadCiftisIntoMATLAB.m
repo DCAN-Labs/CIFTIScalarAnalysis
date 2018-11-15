@@ -26,6 +26,7 @@ wb_command='wb_command';
 data_type = 'scalar';
 within_networks = false;
 large_file = false;
+singlefile = 0;
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if ischar(varargin{i})
@@ -48,6 +49,8 @@ if isempty(varargin) == 0
                     ciftipath = varargin{i+1};
                 case('GiftiPath')
                     giftipath = varargin{i+1};
+                case('SingleFile')
+                    singlefile = 1;
             end
         end
     end
@@ -55,9 +58,13 @@ end
 addpath(genpath(matlab_ciftipath));
 addpath(genpath(ciftipath));
 addpath(genpath(giftipath));
-fid = fopen(concfile);
-stuff = textscan(fid,'%s');
-filenames = stuff{1};
+if singlefile == 0
+    fid = fopen(concfile);
+    stuff = textscan(fid,'%s');
+    filenames = stuff{1};
+elseif singlefile == 1
+    filenames{1} = concfile;
+end
 nsubs = length(filenames);
 switch data_type
     case('dtseries')
