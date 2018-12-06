@@ -67,8 +67,10 @@ for current_sub = 1:nsubs
     sub_scalar_corr = corr(dtseries_sub',new_dtseries_ROI');
     file_split = split(filenames{current_sub},'/');
     new_filename = file_split(end);
+    ts_file_output = char(strcat(output_directory,'/',ROI_filename,'_',extraction_type,'_timeseries.csv'));
+    dlmwrite(ts_file_output,new_dtseries_ROI');
     ROI_file.cdata = sub_scalar_corr;
-    file_output = char(strcat(output_directory,'/',new_filename,'_corr_via_',ROI_filename,'.dscalar.nii'))
+    file_output = char(strcat(output_directory,'/',new_filename,'_corr_via_',ROI_filename,'.dscalar.nii'));
     ciftisave(ROI_file,file_output,wb_command);
 end
 
