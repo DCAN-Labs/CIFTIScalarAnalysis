@@ -218,6 +218,8 @@ switch(correction_type)
         end        
     case('pivotal') %requires a different set of parameters, and isn't needed now, will be done later -- EF 4/13/18
     case('FDR_storey')
+        pstat=stat_map;
+        logpstat = -log10(stat_map);        
         file_id='FDR_storey';
         switch(structure_type)
             case('surface')
@@ -231,6 +233,8 @@ switch(correction_type)
         end
     case('FDR_BH')
         file_id='FDRBH';
+        pstat=stat_map;
+        logpstat = -log10(stat_map);
         switch(structure_type)
             case('surface')
                 clstat = mafdr(stat_map,'BHFDR',1);
@@ -251,6 +255,10 @@ switch(structure_type)
             hdr.vol = pstat;
             save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.nii'));
         end
+        if exist('logpstat','var')
+            hdr.vol = logpstat;
+            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,'_log10pval.nii'));
+        end
     case('surface')
         if save_gifti
             if size(clstat,2) > 1
@@ -267,6 +275,14 @@ switch(structure_type)
                 end
                 save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.func.gii'),'Base64Binary');
             end
+            if exist('logpstat','var')
+                if size(logpstat,2) > 1
+                    stat_cifti.cdata = logpstat';
+                else
+                    stat_cifti.cdata = logpstat;
+                end
+                save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_logpval.func.gii'),'Base64Binary');                
+            end
         else
             if size(clstat,2) > 1
                 stat_cifti.cdata = clstat';
@@ -281,6 +297,14 @@ switch(structure_type)
                     stat_cifti.cdata = pstat;
                 end
                 ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.dscalar.nii'),wb_command);
+            end
+            if exist('logpstat','var')
+                if size(logpstat,2) > 1
+                    stat_cifti.cdata = logpstat';
+                else
+                    stat_cifti.cdata = logpstat;
+                end
+                ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_logpval.dscalar.nii'),wb_command);                
             end
         end
 end
