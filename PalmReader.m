@@ -120,13 +120,17 @@ switch(analysis_type)
         else
             regressors = ones(size(groupfactors,2),1);
         end
+%        contrast_mat = zeros(size(groupfactors,2),size(groupfactors,2));
+%        better adjustment needed, but the below will work for now.
         for curr_groupfactor = 1:size(groupfactors,2)
+           
             if regressors(curr_groupfactor) > 0
                 groupfactors(:,curr_groupfactor) = groupfactors(:,curr_groupfactor) - mean(groupfactors(:,curr_groupfactor));
+                contras
             end
         end
         design_mat = groupfactors(:,regressors > 0);
-        contrast_mat = eye(size(design_mat,2),size(design_mat,2));
+        contrast_mat = [eye(size(design_mat,2),size(design_mat,2)); -eye(size(design_mat,2),size(design_mat,2))];
         two_tailed = true;
     case('anova')
         evcount = 0;

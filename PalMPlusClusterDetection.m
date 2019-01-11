@@ -289,7 +289,7 @@ switch(structure_type)
             else
                 stat_cifti.cdata = clstat;
             end
-            ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.dscalar.nii'),wb_command);
+            ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_stat.dscalar.nii'),wb_command);
             if exist('pstat','var')
                 if size(pstat,2) > 1
                     stat_cifti.cdata = pstat';

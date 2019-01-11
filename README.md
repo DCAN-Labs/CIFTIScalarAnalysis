@@ -20,6 +20,7 @@ export PATH=/home/exacloud/lustre1/fnl_lab/code/external/utilities/wb_shortcuts/
 export PATH=$PATH:/home/exacloud/lustre1/fnl_lab/code/external/utilities/workbench-1.2.3-HCP/bin_rh_linux64/
 export PATH=$PATH:/home/exacloud/lustre1/fnl_lab/code/external/octave/octave_bin/bin
 export PATH=/home/exacloud/lustre1/fnl_lab/code/external/utilities/exahead1-anaconda2/bin:$PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/exacloud/lustre1/fnl_lab/code/external/SuiteSparse/SuiteSparse/lib:/home/exacloud/lustre1/fnl_lab/code/external/utilities/arpack/lib
 ```
 
 ### Rushmore
