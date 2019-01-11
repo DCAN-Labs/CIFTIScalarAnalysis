@@ -70,6 +70,9 @@ if isempty(varargin) == 0
         end
     end
 end
+if estimate_pvalues
+    correct_pvalues = 0;
+end
 addpath(genpath(matlab_ciftipath))
 addpath(genpath(ciftipath))
 addpath(genpath(matlab_giftipath))
