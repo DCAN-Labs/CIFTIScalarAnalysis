@@ -17,10 +17,12 @@ estimate_test_statistic=${estimate_test_statistic:-'false'}
 test_statistic_CIFTI=${test_statistic_CIFTI:-'NONE'}
 nperms=${nperms:-0}
 OutputPrefix=${OutputPrefix:-'adahn'}
+ZNormalize=${ZNormalize:-'NONE'}
 
 #check for flags and set appropriate parameters
 if ${estimate_test_statistic}; then echo 'estimating p values using test statistics'; else test_statistic_CIFTI='NONE'; fi
+if ${ZNormalize}; then echo 'normalizing test statistics before calculating p values'; ZNation='ZNormalize'; else ZNation='NONE'; fi
 #call matlab command and execute
 
-matlab -nodisplay -nosplash -r "addpath(genpath('"$CIFTIScalarPath"')); PalMPlusClusterDetection('InputCIFTI','"$InputCIFTI"','OutputCIFTI','"$OutputCIFTI"','MatlabCIFTI', '"$MatlabCIFTI"','MatlabGIFTI','"$MatlabGIFTI"','CIFTIPath','"$CIFTIPath"', 'WorkbenchCommand','"$WorkbenchCommand"','PalmDir','"$PalmDir"','InputStructure', '"$InputStructure"','StructureType','"$StructureType"','CorrectionType','"$CorrectionType"', 'CorrectionThresh',"$CorrectionThresh",'FSPath','"$FSPath"','PvalueCorrection', "$pvalue_correction",'EstimateCorrection','"$test_statistic_CIFTI"','NPermutations',"$nperms",'OutputPrefix','"$OutputPrefix"'); exit"
+matlab -nodisplay -nosplash -r "addpath(genpath('"$CIFTIScalarPath"')); PalMPlusClusterDetection('InputCIFTI','"$InputCIFTI"','OutputCIFTI','"$OutputCIFTI"','MatlabCIFTI', '"$MatlabCIFTI"','MatlabGIFTI','"$MatlabGIFTI"','CIFTIPath','"$CIFTIPath"', 'WorkbenchCommand','"$WorkbenchCommand"','PalmDir','"$PalmDir"','InputStructure', '"$InputStructure"','StructureType','"$StructureType"','CorrectionType','"$CorrectionType"', 'CorrectionThresh',"$CorrectionThresh",'FSPath','"$FSPath"','PvalueCorrection', "$pvalue_correction",'EstimateCorrection','"$test_statistic_CIFTI"','NPermutations',"$nperms",'OutputPrefix','"$OutputPrefix"','"$ZNation"'); exit"
 

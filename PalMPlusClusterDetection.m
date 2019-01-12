@@ -17,6 +17,7 @@ estimate_pvalues = 0;
 nperms = 0;
 permutation_test = 0;
 null_distribution = 0;
+znorm = 0;
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if isstruct(varargin{i}) == 0
@@ -63,6 +64,8 @@ if isempty(varargin) == 0
                             permutation_test = 1;
                             null_distribution = zeros(nperms,1);
                         end
+                    case('ZNormalize')
+                        znorm = 1;
                     case('OutputPrefix')
                         output_prefix=varargin{i+1};
                 end
@@ -124,8 +127,13 @@ if estimate_pvalues %if a corresponding test statistic file exists we can estima
     cifti_test_stat_image = ciftiopen(cifti_test_statistic_file,wb_command);
     test_stat = cifti_test_stat_image.cdata;
     zscored_stat = abs((test_stat - mean(test_stat))/std(test_stat));
-    test_map = 1 - normcdf(zscored_stat);
-    stat_map(stat_map==0)=test_map(stat_map==0);
+    if znorm
+        stat_map = 1 - normcdf(zscored_stat);
+        zstr = 'znormed';
+    else
+        stat_map = 1 - normcdf(test_stat);
+        zstr = 'non_znormed';
+    end
 end
 %generate mask for stat image
 plm.masks = cell(1,1);
@@ -253,14 +261,14 @@ end
 switch(structure_type)
     case('volume')
         hdr.vol = clstat;
-        save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,'_stat.nii'));
+        save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_stat.nii'));
         if exist('pstat','var')
             hdr.vol = pstat;
-            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.nii'));
+            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_pval.nii'));
         end
         if exist('logpstat','var')
             hdr.vol = logpstat;
-            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,'_log10pval.nii'));
+            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_log10pval.nii'));
         end
     case('surface')
         if save_gifti
@@ -269,14 +277,14 @@ switch(structure_type)
             else
                 stat_cifti.cdata = clstat;
             end
-            save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_stat.func.gii'),'Base64Binary');
+            save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_stat.func.gii'),'Base64Binary');
             if exist('pstat','var')
                 if size(pstat,2) > 1
                     stat_cifti.cdata = pstat';
                 else
                     stat_cifti.cdata = pstat;
                 end
-                save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.func.gii'),'Base64Binary');
+                save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_pval.func.gii'),'Base64Binary');
             end
             if exist('logpstat','var')
                 if size(logpstat,2) > 1
@@ -284,7 +292,7 @@ switch(structure_type)
                 else
                     stat_cifti.cdata = logpstat;
                 end
-                save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_logpval.func.gii'),'Base64Binary');                
+                save(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_logpval.func.gii'),'Base64Binary');                
             end
         else
             if size(clstat,2) > 1
@@ -292,14 +300,14 @@ switch(structure_type)
             else
                 stat_cifti.cdata = clstat;
             end
-            ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_stat.dscalar.nii'),wb_command);
+            ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_stat.dscalar.nii'),wb_command);
             if exist('pstat','var')
                 if size(pstat,2) > 1
                     stat_cifti.cdata = pstat';
                 else
                     stat_cifti.cdata = pstat;
                 end
-                ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_pval.dscalar.nii'),wb_command);
+                ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_pval.dscalar.nii'),wb_command);
             end
             if exist('logpstat','var')
                 if size(logpstat,2) > 1
@@ -307,7 +315,7 @@ switch(structure_type)
                 else
                     stat_cifti.cdata = logpstat;
                 end
-                ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,'_logpval.dscalar.nii'),wb_command);                
+                ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_logpval.dscalar.nii'),wb_command);                
             end
         end
 end

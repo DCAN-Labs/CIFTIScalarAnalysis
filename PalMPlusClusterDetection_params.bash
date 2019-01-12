@@ -14,6 +14,7 @@ InputStructure=/mnt/max/shared/projects/MyStudy/MyData/midthickness.gii
 	StructureType='surface'
 estimate_test_statistic='false' #if set to true, one can estimate 0 P values from a test statistic file
 	test_statistic_CIFTI='NONE' #the full path to the test statistic file, if 'NONE' is specified then this step will be skipped
+	ZNormalize='false' # if set to true, test statistics will be spatially normalized before calculating p values
 #outputs
 OutputCIFTI=/mnt/max/shared/projects/MyStudy/MyData/zscore_map.dscalar.nii #output statistical map/
 OutputPrefix='FDR' #prefix used to name the files that are output
