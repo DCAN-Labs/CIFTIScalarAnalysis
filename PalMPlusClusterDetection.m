@@ -18,6 +18,7 @@ nperms = 0;
 permutation_test = 0;
 null_distribution = 0;
 znorm = 0;
+zstr = 'cluster_detection';
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if isstruct(varargin{i}) == 0
