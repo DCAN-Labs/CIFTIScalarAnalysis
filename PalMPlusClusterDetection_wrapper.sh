@@ -17,7 +17,7 @@ estimate_test_statistic=${estimate_test_statistic:-'false'}
 test_statistic_CIFTI=${test_statistic_CIFTI:-'NONE'}
 nperms=${nperms:-0}
 OutputPrefix=${OutputPrefix:-'adahn'}
-ZNormalize=${ZNormalize:-'NONE'}
+ZNormalize=${ZNormalize:-'false'}
 
 #check for flags and set appropriate parameters
 if ${estimate_test_statistic}; then echo 'estimating p values using test statistics'; else test_statistic_CIFTI='NONE'; fi
