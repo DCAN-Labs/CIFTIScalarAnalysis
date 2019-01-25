@@ -19,7 +19,9 @@ estimate_test_statistic='false' #if set to true, one can estimate 0 P values fro
 OutputCIFTI=/mnt/max/shared/projects/MyStudy/MyData/zscore_map.dscalar.nii #output statistical map/
 OutputPrefix='FDR' #prefix used to name the files that are output
 #MC parameters
-CorrectionType='FDR' #type of MC correction, can be one of: FDR, extent,mass,density,tippet,or pivotal
+CorrectionType='FDR_storey' #type of MC correction, can be one of: FDR_storey, FDR_BH, extent,mass,density,tippet,or pivotal
 CorrectionThresh=0.05
 nperms=0 #number of permutations to run for random field theory p-value calcuation -- used for cluster discovery only
+#resource parameters
+ncompthreads=2 #number of computational threads for matlab to use, more threads will attempt to use more CPU
 

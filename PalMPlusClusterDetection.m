@@ -18,7 +18,7 @@ nperms = 0;
 permutation_test = 0;
 null_distribution = 0;
 znorm = 0;
-zstr = 'cluster_detection';
+zstr = '_cluster_detection';
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if isstruct(varargin{i}) == 0
@@ -126,14 +126,14 @@ if correct_pvalues
 end
 if estimate_pvalues %if a corresponding test statistic file exists we can estimate pvalues instead of fixing them
     cifti_test_stat_image = ciftiopen(cifti_test_statistic_file,wb_command);
-    test_stat = cifti_test_stat_image.cdata;
+    test_stat = double(cifti_test_stat_image.cdata);
     zscored_stat = abs((test_stat - mean(test_stat))/std(test_stat));
     if znorm
         stat_map = 1 - normcdf(zscored_stat);
-        zstr = 'znormed';
+        zstr = '_znormed';
     else
-        stat_map = 1 - normcdf(test_stat);
-        zstr = 'non_znormed';
+        stat_map = (1 - normcdf(abs(test_stat)))*2;
+        zstr = '_non_znormed';
     end
 end
 %generate mask for stat image
