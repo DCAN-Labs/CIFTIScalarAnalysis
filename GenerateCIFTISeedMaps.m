@@ -64,9 +64,15 @@ for current_sub = 1:nsubs
         case('mean')
             new_dtseries_ROI = mean(dtseries_sub_ROI,1);
     end
-    sub_scalar_corr = corr(dtseries_sub',new_dtseries_ROI');
+    sub_scalar_corr = atanh(corr(dtseries_sub',new_dtseries_ROI'));
     file_split = split(filenames{current_sub},'/');
     new_filename = file_split(end);
+    display(strcat('number of NaNs found in:',char(new_filename),' is:',num2str(sum(isnan(sub_scalar_corr)))))
+    disp('replacing NaNs with randomly generated numbers')
+    sub_scalar_corr(isnan(sub_scalar_corr),1) = randn(sum(isnan(sub_scalar_corr)),1)*std(sub_scalar_corr(isnan(sub_scalar_corr)==0,1))+mean(sub_scalar_corr(isnan(sub_scalar_corr)==0,1));
+    display('replacing seed region with randomly generated numbers')
+    sub_scalar_corr(ROI_data==1,1) = randn(sum(ROI_data==1),1)*std(sub_scalar_corr(ROI_data==0,1))+mean(sub_scalar_corr(ROI_data==0,1));
+    sub_scalar_corr = tanh(sub_scalar_corr);
     ts_file_output = char(strcat(output_directory,'/',ROI_filename,'_',extraction_type,'_timeseries.csv'));
     dlmwrite(ts_file_output,new_dtseries_ROI');
     ROI_file.cdata = sub_scalar_corr;
