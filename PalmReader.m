@@ -32,6 +32,10 @@ function [design_mat,contrast_mat,ftest_mat,sub_mat] = PalmReader(ncases,varargi
 %                   following three parameters: 'Groups','NumFactors',
 %                   'LevelsPerFactor'. Otherwise, this will be a fully 
 %                   within subject design.
+%                   5) 'mixed' -- a mixed effects GLM that assumes the
+%                   covariance between all grouped measures is roughly
+%                   equal. Three parameters MUST be specified,
+%                   'NumRepeatedMeasures','Groups','MainEffect'
 %
 % *'NumFactors'* -- an required scalar for between subject and combined ANOVAs
 %  specifies the number of between subject factors.
@@ -47,6 +51,8 @@ function [design_mat,contrast_mat,ftest_mat,sub_mat] = PalmReader(ncases,varargi
 %  each factor. Required for between subject and combined ANOVAs. If the
 %  number of unique values does not equal the specified factor level, an
 %  error will occur.
+% *'MainEffect'* -- a string that indicates whether the main effect is
+% "within" or "between" group factors.
 % *'SaveOutput'* -- a string that represents the full path to the output
 % directory. The program will save the design files in that directory.
 % *'RegressorVector'* -- a vector denoting which columns in Groups are
@@ -96,6 +102,12 @@ if isempty(varargin) == 0
                         groupfactors = varargin{i+1};
                     case('RegressorVector')
                         regressors = varargin{i+1};
+                    case('MainEffect')
+                        if strcmp(varargin{i+1},'within')
+                            within_effect = true;
+                        else
+                            within_effect = false;
+                        end
                 end
             end
         end
@@ -256,8 +268,9 @@ switch(analysis_type)
                     end
                 end
             end
-        end        
-        design_mat = [ ev ones(ncases,1) ];
+        end
+        ev = ev*-1;
+        design_mat = [ ev ones(length(ev),1) ];
         contrast_mat = [eye(size(ev,2)) zeros(size(ev,2),1)];
         nftests = 0;
         for currfactor = 1:numfactors
@@ -293,7 +306,7 @@ switch(analysis_type)
                             for currfactortwo = 1:factor_levels(factortwo) - 1
                                 for currfactorthree = 1:factor_levels(factorthree) - 1
                                     evcount = evcount + 1;
-                                    ftest_mat(ftest_count,evcount) = 1
+                                    ftest_mat(ftest_count,evcount) = 1;
                                 end
                             end
                         end
@@ -377,12 +390,61 @@ switch(analysis_type)
             end                
         end                
     case('rmanova')
-        if exist('numfactors','var') == 0
+        sub_mat = ones(ncases*numrm,1);
+        nevs = numrm-1 + ncases;
+        ev = zeros(ncases*numrm,nevs);
+        curr_ev = 0;
+        ev(1:numrm:ncases*numrm,1:numrm-1) = 1;
+        contrast_checkbook = zeros(numrm-1,2);
+        for iter = 1:numrm-1
+            contrast_checkbook(iter,1) = -1;
+            contrast_checkbook(iter,2) = iter;
+        end
+        for currmeas = 2:numrm
+            curr_ev = curr_ev + 1;
+            ev(currmeas:numrm:ncases*numrm,curr_ev) = -1;
+            sub_mat(currmeas:numrm:end) = currmeas;
+        end
+        for currsubj = 1:ncases
+            curr_ev = curr_ev + 1;
+            ev(1 + (currsubj-1)*numrm:currsubj*numrm,curr_ev) = 1;
+        end
+        ncontrasts = nchoosek(numrm,2)*2;
+        contrast_mat = zeros(ncontrasts,nevs);
+        curr_contrast = 0;
+        for measone = 1:numrm-1
+            for meastwo = measone+1:numrm
+                if measone == 1
+                    curr_contrast = curr_contrast + 1;
+                    contrast_mat(curr_contrast,1:numrm-1) = 1;
+                    contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) - contrast_checkbook(meastwo-1,1);
+                    curr_contrast = curr_contrast + 1;
+                    contrast_mat(curr_contrast,1:numrm-1) = -1;
+                    contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) + contrast_checkbook(meastwo-1,1);                        
+                else
+                    curr_contrast = curr_contrast + 1;
+                    contrast_mat(curr_contrast,contrast_checkbook(measone-1,2)) = contrast_checkbook(measone-1,1);
+                    contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) - contrast_checkbook(meastwo-1,1);  
+                    curr_contrast = curr_contrast + 1;
+                    contrast_mat(curr_contrast,contrast_checkbook(measone-1,2)) = contrast_checkbook(measone-1,1)*-1;
+                    contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) + contrast_checkbook(meastwo-1,1);                          
+                end
+            end
+        end
+        ftest_mat = ones(ncontrasts,1);
+        design_mat = ev;
+    case('mixed')
+        if (within_effect)
             sub_mat = ones(ncases*numrm,1);
             nevs = numrm-1 + ncases;
             ev = zeros(ncases*numrm,nevs);
             curr_ev = 0;
-            ev(1:numrm:ncases*numrm,1:numrm) = 1;
+            ev(1:numrm:ncases*numrm,1:numrm-1) = 1;
+            contrast_checkbook = zeros(numrm-1,2);
+            for iter = 1:numrm-1
+                contrast_checkbook(iter,1) = -1;
+                contrast_checkbook(iter,2) = iter;
+            end
             for currmeas = 2:numrm
                 curr_ev = curr_ev + 1;
                 ev(currmeas:numrm:ncases*numrm,curr_ev) = -1;
@@ -392,23 +454,34 @@ switch(analysis_type)
                 curr_ev = curr_ev + 1;
                 ev(1 + (currsubj-1)*numrm:currsubj*numrm,curr_ev) = 1;
             end
-            ncontrasts = 0;
-            for iter = 1:numrm-1
-                ncontrasts = ncontrasts + numrm-iter;
-            end
-            ncontrasts = ncontrasts*2;
+            ncontrasts = nchoosek(numrm,2)*2;
             contrast_mat = zeros(ncontrasts,nevs);
             curr_contrast = 0;
-            for measone = 1:numrm - 1
+            for measone = 1:numrm-1
                 for meastwo = measone+1:numrm
-                    curr_contrast = curr_contrast + 1;
-                    contrast_mat(curr_contrast,:) = sum(ev(measone:numrm:end,:)) - sum(ev(meastwo:numrm:end,:));
+                    if measone == 1
+                        curr_contrast = curr_contrast + 1;
+                        contrast_mat(curr_contrast,1:numrm-1) = 1;
+                        contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) - contrast_checkbook(meastwo-1,1);
+                        curr_contrast = curr_contrast + 1;
+                        contrast_mat(curr_contrast,1:numrm-1) = -1;
+                        contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) + contrast_checkbook(meastwo-1,1);                        
+                    else
+                        curr_contrast = curr_contrast + 1;
+                        contrast_mat(curr_contrast,contrast_checkbook(measone-1,2)) = contrast_checkbook(measone-1,1);
+                        contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) - contrast_checkbook(meastwo-1,1);  
+                        curr_contrast = curr_contrast + 1;
+                        contrast_mat(curr_contrast,contrast_checkbook(measone-1,2)) = contrast_checkbook(measone-1,1)*-1;
+                        contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) = contrast_mat(curr_contrast,contrast_checkbook(meastwo-1,2)) + contrast_checkbook(meastwo-1,1);                          
+                    end
                 end
             end
-            ftest_mat = eye(ncontrasts);
-            design_mat = ev;
+            ftest_mat = ones(ncontrasts,1);
+            design_mat = ev;           
         else
+            
         end
+        
 end
 if save_output
     mkdir(output_directory);
