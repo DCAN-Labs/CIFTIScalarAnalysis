@@ -67,6 +67,11 @@ for current_sub = 1:nsubs
     sub_scalar_corr = atanh(corr(dtseries_sub',new_dtseries_ROI'));
     file_split = split(filenames{current_sub},'/');
     new_filename = file_split(end);
+    for curr_split = 1:length(file_split)
+        if isempty(strfind(file_split(curr_split),'sub-'))==0
+            new_filename = strcat(file_split(curr_split),'_',new_filename);
+        end
+    end
     display(strcat('number of NaNs found in:',char(new_filename),' is:',num2str(sum(isnan(sub_scalar_corr)))))
     disp('replacing NaNs with randomly generated numbers')
     sub_scalar_corr(isnan(sub_scalar_corr),1) = randn(sum(isnan(sub_scalar_corr)),1)*std(sub_scalar_corr(isnan(sub_scalar_corr)==0,1))+mean(sub_scalar_corr(isnan(sub_scalar_corr)==0,1));
