@@ -42,9 +42,13 @@ if ischar(cifti_dscalar)
     cifti_dscalar = dscalar_loaded.cdata;
 end
 if ischar(cifti_distance)
-    distance_loaded = ciftiopen(cifti_distance,wb_command);
-    cifti_distance = distance_loaded.cdata;
-    clear distance_loaded
+    if strcmp(cifti_distance(end-3:end),'.mat')
+        cifti_distance = cell2mat(struct2cell(load(cifti_distance,'distances')));
+    else
+        distance_loaded = ciftiopen(cifti_distance,wb_command);
+        cifti_distance = distance_loaded.cdata;
+        clear distance_loaded
+    end
 end
 thresh_matrix = cifti_distance <= distance_thresh;
 clear cifti_distance
