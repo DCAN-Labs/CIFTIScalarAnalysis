@@ -10,8 +10,8 @@ FSPath=/mnt/max/shared/code/external/utilities/freesurfer-5.3.0-HCP/ #path to fr
 #inputs
 InputCIFTI=/mnt/max/shared/projects/MyStudy/MyData/stat_map.dscalar.nii #input statistical map
 	pvalue_correction=0 #if set to a non-zero will replace any zeros in the statistical map with a nonzero of this value
-InputStructure=/mnt/max/shared/projects/MyStudy/MyData/midthickness.gii
-	StructureType='surface'
+	StructureType='surface' #can be 'surface','volume',or,'pconn'. This value MUST be set appropriately, even if cluster detection is not run
+InputStructure=/mnt/max/shared/projects/MyStudy/MyData/midthickness.gii #only needed for 'surface' cluster detection
 estimate_test_statistic='false' #if set to true, one can estimate 0 P values from a test statistic file
 	test_statistic_CIFTI='NONE' #the full path to the test statistic file, if 'NONE' is specified then this step will be skipped
 	ZNormalize='false' # if set to true, test statistics will be spatially normalized before calculating p values

@@ -69,6 +69,8 @@ if isempty(varargin) == 0
                         znorm = 1;
                     case('OutputPrefix')
                         output_prefix=varargin{i+1};
+                    case('Modules')
+                        module_inputs=varargin{i+1};
                 end
             end
         end
@@ -119,6 +121,11 @@ switch(structure_type)
         plm.Yisvol=false;
         plm.Yisfac=true;
         plm.Yisvtx=true;
+    case('pconn')
+        save_gifti=0;
+        stat_cifti = ciftiopen(stat_file,wb_command);
+        stat_pconn = abs(stat_cifti.cdata);
+        stat_map = ConnMatrixtoConnVector(stat_pconn); %a little confusing but stat_map here is actually a vector, whereas stat_pconn is the matrix
 end
 %if stat image contains zeros for pvalues, fix them here
 if correct_pvalues
@@ -126,7 +133,12 @@ if correct_pvalues
 end
 if estimate_pvalues %if a corresponding test statistic file exists we can estimate pvalues instead of fixing them
     cifti_test_stat_image = ciftiopen(cifti_test_statistic_file,wb_command);
-    test_stat = double(cifti_test_stat_image.cdata);
+    if strcmp(structure_type,'pconn')
+        test_mat = double(cifti_test_stat_image.cdata);
+        test_stat = ConnMatrixtoConnVector(test_mat);
+    else
+        test_stat = double(cifti_test_stat_image.cdata);
+    end
     zscored_stat = abs((test_stat - mean(test_stat))/std(test_stat));
     if znorm
         stat_map = 1 - normcdf(zscored_stat);
@@ -242,6 +254,8 @@ switch(correction_type)
                 new_map(:) = stat_map;
                 clstat_reshaped = mafdr(new_map);
                 clstat = reshape(clstat_reshaped,lth,width);
+            case('pconn')
+                clstat = mafdr(stat_map);                
         end
     case('FDR_BH')
         file_id='FDRBH';
@@ -255,8 +269,11 @@ switch(correction_type)
                 new_map=zeros(lth*width,1);
                 new_map(:) = stat_map;
                 clstat_reshaped = mafdr(new_map,'BHFDR',1);
-                clstat = reshape(clstat_reshaped,lth,width);     
+                clstat = reshape(clstat_reshaped,lth,width);
+            case('pconn')
+                clstat = mafdr(stat_map);                
         end
+    case('enrichment') %requires a different set of parameter, will be done later -- EF 6/12/19
 end
 %save corresponding output
 switch(structure_type)
@@ -269,7 +286,21 @@ switch(structure_type)
         end
         if exist('logpstat','var')
             hdr.vol = logpstat;
-            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_log10pval.nii'));
+            save_nifti(hdr,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_logpval.nii'));
+        end
+    case('pconn')
+        clstat_pconn = ConnVectortoConnMatrix(clstat,nrois);
+        stat_cifti.cdata = clstat_pconn;
+        ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_stat.pconn.nii'),wb_command);    
+        if exist('pstat','var')
+            pstat_pconn = ConnVectortoConnMatrix(pstat,nrois);
+            stat_cifti.cdata = pstat_pconn;
+            ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_pval.pconn.nii'),wb_command);           
+        end
+        if exist('logpstat','var')
+            logpstat_pconn = ConnVectortoConnMatrix(logpstat,nrois);
+            stat_cifti.cdata = logpstat_pconn;
+            ciftisave(stat_cifti,strcat(output_path,'/',output_prefix,'_',file_id,zstr,'_logpval.pconn.nii'),wb_command);                   
         end
     case('surface')
         if save_gifti
