@@ -1,4 +1,4 @@
-function [scalar_data,filenames] = ReadCiftisIntoMATLAB(concfile,varargin)
+function [scalar_data,filenames,nanlist,zerolist] = ReadCiftisIntoMATLAB(concfile,varargin)
 %ReadCiftisIntoMATLAB will read a list of scalar CIFTIs into matlab via a conc file
 %%%%%%%% INPUTS %%%%%%
 % concfile -- a conc file listing N nifti inputs where N is the number of
@@ -27,6 +27,7 @@ data_type = 'scalar';
 within_networks = false;
 large_file = false;
 singlefile = 0;
+method = 'all';
 if isempty(varargin) == 0
     for i = 1:size(varargin,2)
         if ischar(varargin{i})
@@ -51,6 +52,8 @@ if isempty(varargin) == 0
                     giftipath = varargin{i+1};
                 case('SingleFile')
                     singlefile = 1;
+                case('Method')
+                    method = varargin{i+1};
             end
         end
     end
@@ -66,11 +69,22 @@ elseif singlefile == 1
     filenames{1} = concfile;
 end
 nsubs = length(filenames);
+nanlist = zeros(nsubs,1);
+zerolist = logical(nanlist);
 switch data_type
     case('dtseries')
         scalar_data = cell(nsubs,1);
+        sub_count = 1;
         for current_sub = 1:nsubs
-            scalar_data{current_sub} = ciftiopen(filenames{current_sub},wb_command);
+            temp_cifti = ciftiopen(filenames{current_sub},wb_command);
+            nanlist(current_sub) = sum(sum(isnan(temp_cifti.cdata)));
+            zerolist(current_sub) = sum(sum(temp_cifti.cdata)) == 0;
+            if nanlist(current_sub) == 0
+                if zerolist(current_sub) == 0
+                    scalar_data{sub_count} = ciftiopen(filenames{current_sub},wb_command);
+                    sub_count = sub_count + 1;
+                end
+            end                
         end
         if exist('filename','var')
             if large_file
@@ -80,13 +94,21 @@ switch data_type
             end
         end     
     case('scalar')
+        sub_count = 1;
         for current_sub = 1:nsubs
             temp_cifti = ciftiopen(filenames{current_sub},wb_command);
+            nanlist(current_sub) = sum(isnan(temp_cifti.cdata));
+            zerolist(current_sub) = sum(temp_cifti.cdata) == 0;            
             if current_sub == 1
                 nscalarpts = size(temp_cifti.cdata,1);
                 scalar_data = zeros(nsubs,nscalarpts);
             end
-            scalar_data(current_sub,:) = temp_cifti.cdata;
+            if nanlist(current_sub) == 0
+                if zerolist(current_sub) == 0
+                    scalar_data(sub_count,:) = temp_cifti.cdata;
+                    sub_count = sub_count + 1;
+                end
+            end
         end
         if exist('filename','var')
             if large_file
@@ -96,13 +118,41 @@ switch data_type
             end
         end        
     case('connmat')
-        for current_sub = 1:nsubs
-            temp_cifti = ciftiopen(filenames{current_sub},wb_command);
-            if current_sub == 1
-                nconns = size(temp_cifti.cdata,1);
-                scalar_data = zeros(nconns,nconns,nsubs);
-            end
-            scalar_data(:,:,current_sub) = temp_cifti.cdata;
+        sub_count = 1;
+        switch(method)
+            case('all')
+                for current_sub = 1:nsubs
+                    temp_cifti = ciftiopen(filenames{current_sub},wb_command);
+                    nanlist(current_sub) = sum(sum(isnan(temp_cifti.cdata)));
+                    zerolist(current_sub) = sum(sum(temp_cifti.cdata)) == 0;                    
+                    if current_sub == 1
+                        nconns = size(temp_cifti.cdata,1);
+                        scalar_data = zeros(nconns,nconns,nsubs);
+                    end
+                    if nanlist(current_sub) == 0
+                        if zerolist(current_sub) == 0
+                            scalar_data(:,:,current_sub) = temp_cifti.cdata;
+                            sub_count = sub_count + 1;
+                        end
+                    end
+                end
+            case('average')
+                for current_sub = 1:nsubs
+                    temp_cifti = ciftiopen(filenames{current_sub},wb_command);
+                    nanlist(current_sub) = sum(sum(isnan(temp_cifti.cdata)));
+                    zerolist(current_sub) = sum(sum(temp_cifti.cdata)) == 0;                                        
+                    if current_sub == 1
+                        nconns = size(temp_cifti.cdata,1);
+                        scalar_data = zeros(nconns,nconns);
+                    end
+                    if nanlist(current_sub) == 0
+                        if zerolist(current_sub) == 0
+                            scalar_data = scalar_data + temp_cifti.cdata;
+                            sub_count = sub_count + 1;
+                        end
+                    end
+                end
+                scalar_data = scalar_data./sub_count;
         end
         if exist('filename','var')            
             if large_file
@@ -112,6 +162,7 @@ switch data_type
             end
         end        
     case('connmat2scalar')
+        sub_count = 1;
         if within_networks
             module_ids = unique(modules(:,1));
             nmodules = length(unique(modules(:,1)));
@@ -124,14 +175,21 @@ switch data_type
             new_modules = zeros(nconns,1);
             for current_sub = 1:nsubs
                 temp_cifti = ciftiopen(filenames{current_sub},wb_command);
-                curr_conn = 1;
-                for curr_module = 1:nmodules
-                    conns_in_mod = nonzeros(triu(temp_cifti.cdata(modules(modules(:,1) == module_ids(curr_module),2),modules(modules(:,1) ==module_ids(curr_module),2)),1));                   
-                    scalar_data(current_sub,curr_conn:curr_conn+(length(conns_in_mod)-1)) = conns_in_mod;
-                    if current_sub == 1
-                        new_modules(curr_conn:curr_conn+length(conns_in_mod)-1) = module_ids(curr_module);
+                nanlist(current_sub) = sum(sum(isnan(temp_cifti.cdata)));
+                zerolist(current_sub) = sum(sum(temp_cifti.cdata)) == 0;
+                if nanlist(current_sub) == 0
+                    if zerolist(current_sub) == 0
+                        curr_conn = 1;
+                        for curr_module = 1:nmodules
+                            conns_in_mod = nonzeros(triu(temp_cifti.cdata(modules(modules(:,1) == module_ids(curr_module),2),modules(modules(:,1) ==module_ids(curr_module),2)),1));                   
+                            scalar_data(sub_count,curr_conn:curr_conn+(length(conns_in_mod)-1)) = conns_in_mod;
+                            if sub_count == 1
+                                new_modules(curr_conn:curr_conn+length(conns_in_mod)-1) = module_ids(curr_module);
+                            end
+                            curr_conn = curr_conn + length(conns_in_mod);
+                        end
+                        sub_count = sub_count + 1;
                     end
-                    curr_conn = curr_conn + length(conns_in_mod);
                 end
             end
             if exist('filename','var')
@@ -151,24 +209,31 @@ switch data_type
             module_names = cell(nconns,1);
             for current_sub = 1:nsubs
                 temp_cifti = ciftiopen(filenames{current_sub},wb_command);
-                curr_conn = 1;
-                module_count = 1;
-                for curr_module = 1:nmodules
-                    for second_module = curr_module:nmodules
-                        if curr_module == second_module
-                            conns_in_mod = nonzeros(triu(temp_cifti.cdata(modules(modules(:,1) == module_ids(curr_module),2),modules(modules(:,1) ==module_ids(second_module),2)),1));
-                        else
-                            old_conns_in_mod = temp_cifti.cdata(modules(modules(:,1) == module_ids(curr_module),2),modules(modules(:,1) ==module_ids(second_module),2));
-                            conns_in_mod = zeros(size(old_conns_in_mod,1)*size(old_conns_in_mod,2),1);
-                            conns_in_mod(:) = old_conns_in_mod;
+                nanlist(current_sub) = sum(sum(isnan(temp_cifti.cdata)));
+                zerolist(current_sub) = sum(sum(temp_cifti.cdata)) > 0;
+                if nanlist(current_sub) == 0
+                    if zerolist(current_sub) == 0
+                        curr_conn = 1;
+                        module_count = 1;
+                        for curr_module = 1:nmodules
+                            for second_module = curr_module:nmodules
+                                if curr_module == second_module
+                                    conns_in_mod = nonzeros(triu(temp_cifti.cdata(modules(modules(:,1) == module_ids(curr_module),2),modules(modules(:,1) ==module_ids(second_module),2)),1));
+                                else
+                                    old_conns_in_mod = temp_cifti.cdata(modules(modules(:,1) == module_ids(curr_module),2),modules(modules(:,1) ==module_ids(second_module),2));
+                                    conns_in_mod = zeros(size(old_conns_in_mod,1)*size(old_conns_in_mod,2),1);
+                                    conns_in_mod(:) = old_conns_in_mod;
+                                end
+                                scalar_data(sub_count,curr_conn:curr_conn+(length(conns_in_mod)-1)) = conns_in_mod;
+                                if sub_count == 1
+                                    new_modules(curr_conn:curr_conn+length(conns_in_mod)-1) = module_count;
+                                    module_names(curr_conn:curr_conn+length(conns_in_mod)-1) = {[num2str(module_ids(curr_module)) 'to' num2str(module_ids(second_module))]};
+                                    module_count = module_count + 1;
+                                end
+                                curr_conn = curr_conn + length(conns_in_mod);                      
+                            end
                         end
-                        scalar_data(current_sub,curr_conn:curr_conn+(length(conns_in_mod)-1)) = conns_in_mod;
-                        if current_sub == 1
-                            new_modules(curr_conn:curr_conn+length(conns_in_mod)-1) = module_count;
-                            module_names(curr_conn:curr_conn+length(conns_in_mod)-1) = {[num2str(module_ids(curr_module)) 'to' num2str(module_ids(second_module))]};
-                            module_count = module_count + 1;
-                        end
-                        curr_conn = curr_conn + length(conns_in_mod);                      
+                        sub_count = sub_count + 1;
                     end
                 end
             end 
